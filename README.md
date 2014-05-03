@@ -52,7 +52,7 @@ Examples
 
 Listing all completed actions:
 ```
-$ ./arsa.py -l
+$ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
 things I'd like to clean (completed):
 -------------------------------------
 action #1494 ('Remote Command on mymachine.localdomain.loc.')
@@ -60,7 +60,7 @@ action #1494 ('Remote Command on mymachine.localdomain.loc.')
 
 Removing all completed and archived actions:
 ```
-$ ./arsa.py -r
+$ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -r
 Archving action #1494 ('Remote Command on mymachine.localdomain.loc.')...
 Deleting action #1494 ('Remote Command on mymachine.localdomain.loc.')...
 Deleting action #1493 ('Remote Command on myothermachine.localdomain.loc.')...
