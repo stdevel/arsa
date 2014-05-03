@@ -83,6 +83,8 @@ if __name__ == "__main__":
 
                 #also clean-up already archived actions if wanted
                 if options.removeAll:
+                        #reload archived actions
+                        archived_actions = client.schedule.listArchivedActions(key)
                         if options.listonly: print "\nthings I'd like to remove (archived):\n-------------------------------------"
                         for entry in archived_actions:
                                 if options.listonly:
