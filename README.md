@@ -1,15 +1,15 @@
 arsa
 ====
 
-a script for archiving and removing old Spacewalk, Red Hat Satellite or SUSE Manager actions.
+a script for archiving and removing old [Spacewalk](http://www.spacewalkproject.org/), [Red Hat Satellite](http://www.redhat.com/products/enterprise-linux/satellite/) or [SUSE Manager](http://www.suse.com/products/suse-manager/) actions.
 
-The login credentials **are prompted** when running the script. If you need to automate this (e.g. cronjobs) you have two options:
+The login credentials **are prompted** when running the script. If you need to automate this (*e.g. cronjobs*) you have two options:
 
 **1.Setting two shell variables:**
 * **SATELLITE_LOGIN** - a username
 * **SATELLITE_PASSWORD** - the appropriate password
 
-You might also want to set the HISTFILE variable (depending on your shell) to hide the command including the password in the history:
+You might also want to set the HISTFILE variable (*depending on your shell*) to hide the command including the password in the history:
 ```
 $ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
 ```
@@ -35,7 +35,7 @@ Archive completed actions and remove all archived actions afterwards:
 $ ./arsa.py -r
 ```
 
-Only list which actions would be deleted (dry-run):
+Only list which actions would be deleted (*dry-run*):
 ```
 $ ./arsa.py -l
 ```
@@ -63,7 +63,7 @@ $ ./arsa.py -rl
 Examples
 ========
 
-Listing all completed actions (login information are passed using shell variables):
+Listing all completed actions (*login information are passed using shell variables*):
 ```
 $ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
 things I'd like to clean (completed):
@@ -71,13 +71,13 @@ things I'd like to clean (completed):
 action #1494 ('Remote Command on mymachine.localdomain.loc.')
 ```
 
-Removing all completed actions (login information are provided by the authfile):
+Removing all completed actions (*login information are provided by the authfile*):
 ```
 $ ./arsa.py -a myauthfile
 Archving action #1494 ('Remote Command on mymachine.localdomain.loc.')...
 ```
 
-Removing all completed and archived actions (login information are prompted):
+Removing all completed and archived actions (*login information are prompted*):
 ```
 $ ./arsa.py -r
 Username: mylogin
