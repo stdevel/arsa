@@ -3,9 +3,22 @@ arsa
 
 a script for archiving and removing old Spacewalk, Red Hat Satellite or SUSE Manager actions.
 
-The script requires two shell variables to be set:
+The login credentials are prompted when running the script. If you need to automate this (e.g. cronjobs) you have two options:
+
+1.Setting two shell variables:
 * **SATELLITE_LOGIN** - a username
 * **SATELLITE_PASSWORD** - the appropriate password
+
+You might also want to set the HISTFILE variable (depending on your shell) to hide the command including the password in the history:
+```
+$ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
+```
+
+2.Using an authfile
+A better possibility is to create a authfile with permisions 0600. Just enter the username in the first line and the password in the second line and hand the path to the script:
+```
+$ ./arsa.py -l -a myauthfile
+```
 
 By default the script archives completed actions but you can also remove archived actions.
 
@@ -50,7 +63,7 @@ $ ./arsa.py -rl
 Examples
 ========
 
-Listing all completed actions:
+Listing all completed actions (login information are passed using shell variables):
 ```
 $ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
 things I'd like to clean (completed):
@@ -58,9 +71,17 @@ things I'd like to clean (completed):
 action #1494 ('Remote Command on mymachine.localdomain.loc.')
 ```
 
-Removing all completed and archived actions:
+Removing all completed actions (login information are provided by the authfile):
 ```
-$ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -r
+$ ./arsa.py -a myauthfile
+Archving action #1494 ('Remote Command on mymachine.localdomain.loc.')...
+```
+
+Removing all completed and archived actions (login information are prompted):
+```
+$ ./arsa.py -r
+Username: mylogin
+Password: 
 Archving action #1494 ('Remote Command on mymachine.localdomain.loc.')...
 Deleting action #1494 ('Remote Command on mymachine.localdomain.loc.')...
 Deleting action #1493 ('Remote Command on myothermachine.localdomain.loc.')...
