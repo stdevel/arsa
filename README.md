@@ -15,6 +15,7 @@ $ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
 ```
 
 **2.Using an authfile**
+
 A better possibility is to create a authfile with permisions 0600. Just enter the username in the first line and the password in the second line and hand the path to the script:
 ```
 $ ./arsa.py -l -a myauthfile
