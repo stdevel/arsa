@@ -41,7 +41,7 @@ Only list which actions would be deleted (*dry-run*):
 $ ./arsa.py -l
 ```
 
-Archive and remove all actions (completed, already archived and also failed actions):
+Archive and remove all actions (*completed, already archived and also failed actions*):
 ```
 $ ./arsa.py -rf
 ```
