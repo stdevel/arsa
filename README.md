@@ -1,7 +1,7 @@
 arsa
 ====
 
-a script for archiving and removing old [Spacewalk](http://www.spacewalkproject.org/), [Red Hat Satellite](http://www.redhat.com/products/enterprise-linux/satellite/) or [SUSE Manager](http://www.suse.com/products/suse-manager/) actions.
+`arsa.py` is a script for archiving and removing old [Spacewalk](http://www.spacewalkproject.org/), [Red Hat Satellite](http://www.redhat.com/products/enterprise-linux/satellite/) or [SUSE Manager](http://www.suse.com/products/suse-manager/) actions.
 
 The login credentials **are prompted** when running the script. If you need to automate this (*e.g. cronjobs*) you have two options:
 
@@ -16,7 +16,7 @@ $ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
 
 **2.Using an authfile**
 
-A better possibility is to create a authfile with permisions 0600. Just enter the username in the first line and the password in the second line and hand the path to the script:
+A better possibility is to create a authfile with permisions **0600**. Just enter the username in the first line and the password in the second line and hand the path to the script:
 ```
 $ ./arsa.py -l -a myauthfile
 ```
