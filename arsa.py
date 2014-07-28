@@ -141,7 +141,6 @@ If you're not defining variables or an authfile you will be prompted to enter yo
                 if options.verbose: print "Enabling workaround to archive/delete more than 100 actions..."
                 tempActions = []
                 for action in toArchive:
-                        print action
                         if len(tempActions) != 100:
                                 tempActions.append(action)
                         else:
