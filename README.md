@@ -41,6 +41,11 @@ Only list which actions would be deleted (*dry-run*):
 $ ./arsa.py -l
 ```
 
+Archive and remove all actions (completed, already archived and also failed actions):
+```
+$ ./arsa.py -rf
+```
+
 Specify a different Spacewalk/Red Hat Satellite/SUSE Manager server than **localhost**:
 ```
 $ ./arsa.py -s 192.168.178.100
