@@ -81,7 +81,6 @@ If you're not defining variables or an authfile you will be prompted to enter yo
         elif "SATELLITE_LOGIN" in os.environ and "SATELLITE_PASSWORD" in os.environ:
                 #shell variables
                 if options.debug: print "DEBUG: checking shell variables"
-                print "bla"
                 key = client.auth.login(os.environ["SATELLITE_LOGIN"], os.environ["SATELLITE_PASSWORD"])
         else:
                 #prompt user
