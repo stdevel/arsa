@@ -1,4 +1,4 @@
-!/usr/bin/python
+#!/usr/bin/python
 
 # arsa.py - a script for archiving and removing old
 # Spacewalk, Red Hat Satellite or SUSE Manager actions.
