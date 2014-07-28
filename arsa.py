@@ -1,4 +1,4 @@
-#!/usr/bin/python
+!/usr/bin/python
 
 # arsa.py - a script for archiving and removing old
 # Spacewalk, Red Hat Satellite or SUSE Manager actions.
@@ -13,9 +13,10 @@ import xmlrpclib
 import os
 import stat
 import getpass
+import time
 
 #list of supported API levels
-supportedAPI = ["11.1","12","13","14"]
+supportedAPI = ["11.1","12","13","13.0","14","14.0","15","15.0"]
 
 if __name__ == "__main__":
         #define description, version and load parser
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 If you're not defining variables or an authfile you will be prompted to enter your login information.
 
                 Checkout the GitHub page for updates: https://github.com/stdevel/arsa'''
-        parser = OptionParser(description=desc,version="%prog version 0.2")
+        parser = OptionParser(description=desc,version="%prog version 0.3")
 
         #-a / --authfile
         parser.add_option("-a", "--authfile", dest="authfile", metavar="FILE", default="", help="defines an auth file to use instead of shell variables")
@@ -47,6 +48,9 @@ If you're not defining variables or an authfile you will be prompted to enter yo
 
         #-l / --list-only
         parser.add_option("-l", "--list-only", dest="listonly", default=False, action="store_true", help="only lists actions that would be archived")
+
+        #-f / --include-failed
+        parser.add_option("-f", "--include-failed", dest="includeFailed", default=False, action="store_true", help="also include failed actions")
 
         #parse arguments
         (options, args) = parser.parse_args()
@@ -94,9 +98,11 @@ If you're not defining variables or an authfile you will be prompted to enter yo
         else:
                 if options.debug: print "INFO: supported API version ("+api_level+") found."
 
-        #retrieve completed and already archived actions
+        #retrieve completed, already archived and failed actions
+        toArchive = []
         completed_actions = client.schedule.listCompletedActions(key)
         archived_actions = client.schedule.listArchivedActions(key)
+        failed_actions = client.schedule.listFailedActions(key)
 
         #print actions
         if options.debug: print "completed:\n"+`completed_actions`+"\narchived:\n"+`archived_actions`
@@ -104,21 +110,52 @@ If you're not defining variables or an authfile you will be prompted to enter yo
         #go through completed actions and remove them if wanted
         if options.listonly: print "things I'd like to clean (completed):\n-------------------------------------"
         for entry in completed_actions:
-                if options.listonly:
-                        print "action #"+`entry["id"]`+" ("+`entry["name"]`+")"
-                else:
-                        #archive actions
-                        if options.verbose: print "Archving action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
-                        client.schedule.archiveActions(key,entry["id"])
+                        if options.verbose: print "Found completed action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                        toArchive.append(entry["id"])
 
         #also clean-up already archived actions if wanted
         if options.removeAll:
-                #reload archived actions
-                archived_actions = client.schedule.listArchivedActions(key)
+                #remove archived actions
                 if options.listonly: print "\nthings I'd like to remove (archived):\n-------------------------------------"
                 for entry in archived_actions:
-                        if options.listonly:
-                                print "action #"+`entry["id"]`+" ("+`entry["name"]`+")"
+                                if options.verbose: print "Found archived action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                                toArchive.append(entry["id"])
+
+        #also clean-up failed actions if wanted
+        if options.includeFailed:
+                #remove failed actions
+                if options.listonly: print "\nthings I'd like to remove (failed):\n-----------------------------------"
+                for entry in failed_actions:
+                                if options.verbose: print "Found failed action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                                toArchive.append(entry["id"])
+
+        #archive (and remove) actions if wanted
+        if options.debug: print "\nINFO: toArchive:" + str(`toArchive`)
+        if options.verbose: print "Archiving actions..."
+
+        #removing duplicate entries
+        toArchive = list(set(toArchive))
+
+        #enable 100 actions-per-call workaround if we dug hundreds actions
+        if len(toArchive) > 100:
+                if options.verbose: print "Enabling workaround to archive/delete more than 100 actions..."
+                tempActions = []
+                for action in toArchive:
+                        print action
+                        if len(tempActions) != 100:
+                                tempActions.append(action)
                         else:
-                                if options.verbose: print "Deleting action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
-                                client.schedule.deleteActions(key,entry["id"])
+                                print tempActions
+                                client.schedule.archiveActions(key,tempActions)
+                                time.sleep(.5)
+                                if options.removeAll:
+                                        client.schedule.deleteActions(key,tempActions)
+                                        time.sleep(.5)
+                                tempActions = []
+        else:
+                client.schedule.archiveActions(key,toArchive)
+                if options.removeAll:
+                        client.schedule.deleteActions(key,toArchive)
+
+        #logout and exit
+        client.auth.logout(key)
