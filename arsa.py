@@ -130,30 +130,34 @@ If you're not defining variables or an authfile you will be prompted to enter yo
 
         #archive (and remove) actions if wanted
         if options.debug: print "\nINFO: toArchive:" + str(`toArchive`)
-        if options.verbose: print "Archiving actions..."
 
         #removing duplicate entries
         toArchive = list(set(toArchive))
-
-        #enable 100 actions-per-call workaround if we dug hundreds actions
-        if len(toArchive) > 100:
-                if options.verbose: print "Enabling workaround to archive/delete more than 100 actions..."
-                tempActions = []
-                for action in toArchive:
-                        if len(tempActions) != 100:
-                                tempActions.append(action)
-                        else:
-                                print tempActions
-                                client.schedule.archiveActions(key,tempActions)
-                                time.sleep(.5)
-                                if options.removeAll:
-                                        client.schedule.deleteActions(key,tempActions)
-                                        time.sleep(.5)
-                                tempActions = []
-        else:
-                client.schedule.archiveActions(key,toArchive)
-                if options.removeAll:
-                        client.schedule.deleteActions(key,toArchive)
-
+	
+	#remove actions if listonly not set
+	if options.listonly == False:
+        	if options.verbose: print "Archiving actions..."
+        	#enable 100 actions-per-call workaround if we dug hundreds actions
+	        if len(toArchive) > 100:
+	                if options.verbose: print "Enabling workaround to archive/delete more than 100 actions..."
+	                tempActions = []
+	                for action in toArchive:
+	                        if len(tempActions) != 100:
+	                                tempActions.append(action)
+	                        else:
+	                                print tempActions
+	                                client.schedule.archiveActions(key,tempActions)
+	                                time.sleep(.5)
+	                                if options.removeAll:
+	                                        client.schedule.deleteActions(key,tempActions)
+	                                        time.sleep(.5)
+	                                tempActions = []
+	        else:
+	                client.schedule.archiveActions(key,toArchive)
+	                if options.removeAll:
+				client.schedule.deleteActions(key,toArchive)
+	else:
+		if options.verbose: print "Stopping here as we don't really want to remove actions..."
+	
         #logout and exit
         client.auth.logout(key)
