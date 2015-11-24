@@ -3,7 +3,7 @@
 # arsa.py - a script for archiving and removing old
 # Spacewalk, Red Hat Satellite or SUSE Manager actions.
 #
-# 2014 By Christian Stankowic
+# 2015 By Christian Stankowic
 # <info at stankowic hyphen development dot net>
 # https://github.com/stdevel
 #
@@ -16,7 +16,7 @@ import getpass
 import time
 
 #list of supported API levels
-supportedAPI = ["11.1","12","13","13.0","14","14.0","15","15.0"]
+supportedAPI = ["11.1","12","13","13.0","14","14.0","15","15.0","16","16.0","17","17.0"]
 
 if __name__ == "__main__":
         #define description, version and load parser
