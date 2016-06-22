@@ -3,12 +3,12 @@
 # arsa.py - a script for archiving and removing old
 # Spacewalk, Red Hat Satellite or SUSE Manager actions.
 #
-# 2015 By Christian Stankowic
+# 2016 By Christian Stankowic
 # <info at stankowic hyphen development dot net>
 # https://github.com/stdevel
 #
 
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
 import xmlrpclib
 import os
 import stat
@@ -29,28 +29,37 @@ if __name__ == "__main__":
 If you're not defining variables or an authfile you will be prompted to enter your login information.
 
                 Checkout the GitHub page for updates: https://github.com/stdevel/arsa'''
-        parser = OptionParser(description=desc,version="%prog version 0.3")
-
+        parser = OptionParser(description=desc,version="%prog version 0.4")
+	
+	#define option groups
+	genOpts = OptionGroup(parser, "Generic Options")
+	satOpts = OptionGroup(parser, "Satellite Options")
+	parser.add_option_group(genOpts)
+	parser.add_option_group(satOpts)
+	
         #-a / --authfile
-        parser.add_option("-a", "--authfile", dest="authfile", metavar="FILE", default="", help="defines an auth file to use instead of shell variables")
+        satOpts.add_option("-a", "--authfile", dest="authfile", metavar="FILE", default="", help="defines an auth file to use instead of shell variables")
 
         #-s / --server
-        parser.add_option("-s", "--server", dest="server", metavar="SERVER", default="localhost", help="defines the server to use")
+        satOpts.add_option("-s", "--server", dest="server", metavar="SERVER", default="localhost", help="defines the server to use (default: localhost)")
 
         #-q / --quiet
-        parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
+        genOpts.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout (default: no)")
 
         #-d / --debug
-        parser.add_option("-d", "--debug", dest="debug", default=False, action="store_true", help="enable debugging outputs")
+        genOpts.add_option("-d", "--debug", dest="debug", default=False, action="store_true", help="enable debugging outputs (default: no)")
 
         #-r / --remove
-        parser.add_option("-r", "--remove", dest="removeAll", default=False, action="store_true", help="archives completed actions and removes all archived actions")
+        satOpts.add_option("-r", "--remove", dest="remove_all", default=False, action="store_true", help="archives completed actions and removes all archived actions (default: no)")
 
-        #-l / --list-only
-        parser.add_option("-l", "--list-only", dest="listonly", default=False, action="store_true", help="only lists actions that would be archived")
+        #-n / --dry-run
+        satOpts.add_option("-n", "--dry-run", dest="dry_run", default=False, action="store_true", help="only lists actions that would be archived (default: no)")
 
         #-f / --include-failed
-        parser.add_option("-f", "--include-failed", dest="includeFailed", default=False, action="store_true", help="also include failed actions")
+        satOpts.add_option("-f", "--include-failed", dest="include_failed", default=False, action="store_true", help="also include failed actions (default: no)")
+
+        #-t / --system-tasks
+        satOpts.add_option("-t", "--only-system-tasks", dest="only_system_tasks", default=False, action="store_true", help="only consider automated system tasks such as package list refresh (default: no)")
 
         #parse arguments
         (options, args) = parser.parse_args()
@@ -92,7 +101,7 @@ If you're not defining variables or an authfile you will be prompted to enter yo
         #check whether the API version matches the minimum required
         api_level = client.api.getVersion()
         if not api_level in supportedAPI:
-                print "ERROR: your API version ("+api_level+") does not support the required calls. You'll need API version 1.8 (11.1) or higher!"
+                print "ERROR: Your API version ("+api_level+") does not support the required calls. You'll need API version 1.8 (11.1) or higher!"
                 exit(1)
         else:
                 if options.debug: print "INFO: supported API version ("+api_level+") found."
@@ -103,30 +112,51 @@ If you're not defining variables or an authfile you will be prompted to enter yo
         archived_actions = client.schedule.listArchivedActions(key)
         failed_actions = client.schedule.listFailedActions(key)
 
+        #what to consider as a system task
+        systemTasks = [ 'Show differences between', 'Activation Key Package Auto-Install', 'Package List Refresh', 'Hardware List Refresh' ]
+
         #print actions
         if options.debug: print "completed:\n"+`completed_actions`+"\narchived:\n"+`archived_actions`
 
         #go through completed actions and remove them if wanted
-        if options.listonly: print "things I'd like to clean (completed):\n-------------------------------------"
+        if options.dry_run: print "things I'd like to clean (completed):\n-------------------------------------"
         for entry in completed_actions:
-                        if options.verbose: print "Found completed action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+            if options.only_system_tasks:
+                for task in systemTasks:
+                    if task in entry["name"]:
+                        if options.verbose: print "Found completed system task action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
                         toArchive.append(entry["id"])
+            else:
+                if options.verbose: print "Found completed action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                toArchive.append(entry["id"])
 
         #also clean-up already archived actions if wanted
-        if options.removeAll:
+        if options.remove_all:
                 #remove archived actions
-                if options.listonly: print "\nthings I'd like to remove (archived):\n-------------------------------------"
+                if options.dry_run: print "\nthings I'd like to remove (archived):\n-------------------------------------"
                 for entry in archived_actions:
-                                if options.verbose: print "Found archived action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                    if options.only_system_tasks:
+                        for task in systemTasks:
+                            if task in entry["name"]:
+                                if options.verbose: print "Found archived system task action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
                                 toArchive.append(entry["id"])
+                    else:
+                        if options.verbose: print "Found archived action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                        toArchive.append(entry["id"])
 
         #also clean-up failed actions if wanted
-        if options.includeFailed:
+        if options.include_failed:
                 #remove failed actions
-                if options.listonly: print "\nthings I'd like to remove (failed):\n-----------------------------------"
+                if options.dry_run: print "\nthings I'd like to remove (failed):\n-----------------------------------"
                 for entry in failed_actions:
-                                if options.verbose: print "Found failed action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                    if options.only_system_tasks:
+                        for task in systemTasks:
+                            if task in entry["name"]:
+                                if options.verbose: print "Found failed system task action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
                                 toArchive.append(entry["id"])
+                    else:
+                        if options.verbose: print "Found failed action #"+`entry["id"]`+" ("+`entry["name"]`+")..."
+                        toArchive.append(entry["id"])
 
         #archive (and remove) actions if wanted
         if options.debug: print "\nINFO: toArchive:" + str(`toArchive`)
@@ -134,8 +164,8 @@ If you're not defining variables or an authfile you will be prompted to enter yo
         #removing duplicate entries
         toArchive = list(set(toArchive))
 	
-	#remove actions if listonly not set
-	if options.listonly == False:
+	#remove actions if dry_run not set
+	if options.dry_run == False:
         	if options.verbose: print "Archiving actions..."
         	#enable 100 actions-per-call workaround if we dug hundreds actions
 	        if len(toArchive) > 100:
@@ -148,13 +178,13 @@ If you're not defining variables or an authfile you will be prompted to enter yo
 	                                print tempActions
 	                                client.schedule.archiveActions(key,tempActions)
 	                                time.sleep(.5)
-	                                if options.removeAll:
+	                                if options.remove_all:
 	                                        client.schedule.deleteActions(key,tempActions)
 	                                        time.sleep(.5)
 	                                tempActions = []
 	        else:
 	                client.schedule.archiveActions(key,toArchive)
-	                if options.removeAll:
+	                if options.remove_all:
 				client.schedule.deleteActions(key,toArchive)
 	else:
 		if options.verbose: print "Stopping here as we don't really want to remove actions..."
