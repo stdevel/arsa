@@ -76,7 +76,7 @@ Examples
 
 Listing all completed actions (*login information are passed using shell variables*):
 ```
-$ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
+$ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -n
 things I'd like to clean (completed):
 -------------------------------------
 action #1494 ('Remote Command on mymachine.localdomain.loc.')
