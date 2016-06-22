@@ -11,14 +11,14 @@ The login credentials **are prompted** when running the script. If you need to a
 
 You might also want to set the HISTFILE variable (*depending on your shell*) to hide the command including the password in the history:
 ```
-$ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -l
+$ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -n
 ```
 
 **2.Using an authfile**
 
 A better possibility is to create a authfile with permisions **0600**. Just enter the username in the first line and the password in the second line and hand the path to the script:
 ```
-$ ./arsa.py -l -a myauthfile
+$ ./arsa.py -n -a myauthfile
 ```
 
 By default the script archives completed actions but you can also remove archived actions.
@@ -38,12 +38,17 @@ $ ./arsa.py -r
 
 Only list which actions would be deleted (*dry-run*):
 ```
-$ ./arsa.py -l
+$ ./arsa.py -n
 ```
 
 Archive and remove all actions (*completed, already archived and also failed actions*):
 ```
 $ ./arsa.py -rf
+```
+
+Only archive and remove tasks executed automatically by Satellite (*such as updating package and hardware profiles*):
+```
+$ ./arsa.py -rft
 ```
 
 Specify a different Spacewalk/Red Hat Satellite/SUSE Manager server than **localhost**:
