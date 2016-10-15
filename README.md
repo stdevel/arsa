@@ -1,11 +1,10 @@
-arsa
-====
-
+# arsa
 `arsa.py` is a script for archiving and removing old [Spacewalk](http://www.spacewalkproject.org/), [Red Hat Satellite](http://www.redhat.com/products/enterprise-linux/satellite/) or [SUSE Manager](http://www.suse.com/products/suse-manager/) actions.
 
 The login credentials **are prompted** when running the script. If you need to automate this (*e.g. cronjobs*) you have two options:
 
-**1.Setting two shell variables:**
+## Setting two shell variables
+The following shell variables are used:
 * **SATELLITE_LOGIN** - a username
 * **SATELLITE_PASSWORD** - the appropriate password
 
@@ -14,8 +13,7 @@ You might also want to set the HISTFILE variable (*depending on your shell*) to 
 $ HISTFILE="" SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -n
 ```
 
-**2.Using an authfile**
-
+## Using an authfile
 A better possibility is to create a authfile with permisions **0600**. Just enter the username in the first line and the password in the second line and hand the path to the script:
 ```
 $ ./arsa.py -n -a myauthfile
@@ -23,57 +21,22 @@ $ ./arsa.py -n -a myauthfile
 
 By default the script archives completed actions but you can also remove archived actions.
 
-Parameters
-==========
+# Parameters
+The following parameters can be specified:
 
-Show internal help:
-```
-$ ./arsa.py -h
-```
+| Parameter | Description |
+|:----------|:------------|
+| `-d` / `--debug` | enable debugging outputs (*default: no*) |
+| `-h` / `--help` | shows help and quits |
+| `-a` / `--authfile` | defines an authfile to instead of shell variables |
+| `-s` / `--server` | defines the server to use (*default: localhost*) |
+| `-r` / `--remove` | archives completed actions and removes all archvied actions (*default: no*) |
+| `-n` / `--dry-run` | only lists actions that would be archived (*default: no*) |
+| `-f` / `--include-failed` | also include failed actions (*default: no*) |
+| `-t` / `--only-system-tasks` | only consider automated system tasks such as package list refresh (*default: no*) |
+| `--version` | prints programm version and quits |
 
-Archive completed actions and remove all archived actions afterwards:
-```
-$ ./arsa.py -r
-```
-
-Only list which actions would be deleted (*dry-run*):
-```
-$ ./arsa.py -n
-```
-
-Archive and remove all actions (*completed, already archived and also failed actions*):
-```
-$ ./arsa.py -rf
-```
-
-Only archive and remove tasks executed automatically by Satellite (*such as updating package and hardware profiles*):
-```
-$ ./arsa.py -rft
-```
-
-Specify a different Spacewalk/Red Hat Satellite/SUSE Manager server than **localhost**:
-```
-$ ./arsa.py -s 192.168.178.100
-```
-
-Suppress status outputs:
-```
-$ ./arsa.py -q
-```
-
-Enable debugging outputs for troubleshooting purposes:
-```
-$ ./arsa.py -d
-```
-
-The parameters can also be combined - e.g. doing a dry-run of removing all completed and archived actions:
-```
-$ ./arsa.py -rl
-```
-
-Examples
-========
-
+# Examples
 Listing all completed actions (*login information are passed using shell variables*):
 ```
 $ SATELLITE_LOGIN=mylogin SATELLITE_PASSWORD=mypass ./arsa.py -n
